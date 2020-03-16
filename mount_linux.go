@@ -173,6 +173,11 @@ func directmount(dir string, cfg *MountConfig) (*os.File, error) {
 func mount(dir string, cfg *MountConfig, ready chan<- error) (*os.File, error) {
 	// On linux, mounting is never delayed.
 	ready <- nil
+	res, _ := exec.Command("sh", "-c", "mount | grep "+dir).Output()
+
+	if len(res) > 0 {
+		return nil, fmt.Errorf("%s is already mounted!", dir)
+	}
 
 	// Try mounting without fusermount(1) first: we might be running as root or
 	// have the CAP_SYS_ADMIN capability.
